@@ -1,5 +1,19 @@
 from flask import Flask, jsonify, request
 from movies import movies
+import mysql.connector as mariadb
+
+mariadb_conection = mariadb.connect(
+  host='127.0.0.1',
+  user='root',
+  password='root',
+  database='pelis',
+  port='33067'
+)
+
+
+
+#cursor.execute('DELETE * FROM peliculas')
+#mariadb_conection.commit()
 
 app = Flask(__name__)
 
@@ -7,21 +21,19 @@ app = Flask(__name__)
 def saludo():
   return jsonify({"message": "olis ^.^"})
 
-@app.route('/ping', methods=['GET'])
-def ping():
-  return jsonify({"message": "pong!"})
-
 @app.route('/movies', methods=['GET'])
 def getMovies():
-  return jsonify({"movies":movies, "message": "Movies List"})
+  cursor = mariadb_conection.cursor()
+  cursor.execute('SELECT * FROM peliculas')
+  result = cursor.fetchall()
+  return jsonify({"movies":result, "message": "Movies List"})
 
 @app.route('/movies/<int:movie_id>', methods=['GET'])
 def getMovie(movie_id):
-  selectedMovie = [movie for movie in movies if movie['id'] == movie_id]
-  if(len(selectedMovie) > 0):
-    return jsonify({"movie":selectedMovie})
-  else: 
-    return jsonify({"movie": "Movie not found"})
+  cursor = mariadb_conection.cursor()
+  cursor.execute('SELECT * FROM peliculas WHERE id= {}'.format(movie_id))
+  result = cursor.fetchall()
+  return jsonify({"movies":result, "message": "Movies List"})
 
 @app.route('/movies/', methods=['POST'])
 def addMovie():

@@ -20,6 +20,8 @@ services:
       MYSQL_PASSWORD: user
     volumes:
       - ./src/data:/var/lib/mysql
+    ports:
+      - 33067:3306
 
   adminer:
     image: adminer
